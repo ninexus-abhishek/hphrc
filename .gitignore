@@ -127,3 +127,6 @@ nb-configuration.xml
 
 public/NULL/*
 public/uploads
+
+env.prod
+*.zip
