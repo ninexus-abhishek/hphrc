@@ -63,3 +63,34 @@
     </div> 
 </div>
 <?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<?php $currentCustomer = session('customer'); ?>
+<script type="text/javascript" nonce="<?= SCRIPT_NONCE ?>" src="<?= base_url('assets/modules/DataTables/datatables.min.js') ?>"></script>
+<script nonce="<?= SCRIPT_NONCE ?>" type="text/javascript">
+    $('#example').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "<?= route_to('case.list') ?>",
+            type: "POST",
+            data: {
+                "<?= csrf_token() ?>": "<?= csrf_hash() ?>",
+                customer_id: <?=  $currentCustomer['customer_id'] ?? 0 ?>
+            }
+        },
+        columns: [
+            { data: 'cases_id' },
+            { data: 'cases_priority' },
+            { data: 'case_no' },
+            { data: 'cases_title' },
+            { data: 'cases_assign_to' },
+            { data: 'cases_status' },
+            { data: 'cases_dt_created' },
+            { data: 'employee_name' },
+            { data: 'hearing_date' },
+            { data: 'action', orderable: false, searchable: false }
+        ]
+    });
+</script>
+<?= $this->endSection() ?>

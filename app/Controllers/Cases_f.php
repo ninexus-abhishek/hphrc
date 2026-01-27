@@ -44,6 +44,107 @@ class Cases_f extends BaseController
 
     public function cases_list()
     {
+        if ($this->request->getMethod() === 'post') {
+            $request = $this->request->getPost();
+            $db = \Config\Database::connect();
+
+            $customerId = $request['customer_id'];
+
+            $draw   = intval($request['draw']);
+            $start  = intval($request['start']);
+            $length = intval($request['length']);
+            $search = $request['search']['value'] ?? '';
+
+            $columns = [
+                'cs.cases_id',
+                'cs.cases_priority',
+                'cs.case_no',
+                'cs.cases_title',
+                'cs.cases_assign_to',
+                'cs.cases_status',
+                'cs.cases_dt_created',
+                'emp.user_firstname',
+                'emp.user_lastname'
+            ];
+
+            $builder = $db->table('cases cs')
+            ->select('
+                cs.cases_id,
+                cs.cases_priority,
+                cs.case_no,
+                cs.cases_title,
+                cs.cases_assign_to,
+                cs.cases_status,
+                cs.cases_dt_created,
+                emp.user_firstname,
+                emp.user_lastname
+            ')
+            ->join('employee emp', 'emp.employee_user_id = cs.cases_assign_to', 'left')
+            ->where('cs.refCustomer_id', $customerId);
+
+            if (!empty($search)) {
+                $builder->groupStart()
+                    ->like('cs.case_no', $search)
+                    ->orLike('cs.cases_title', $search)
+                    ->orLike('emp.user_firstname', $search)
+                    ->orLike('emp.user_lastname', $search)
+                ->groupEnd();
+            }
+
+            $filteredBuilder = clone $builder;
+            $recordsFiltered = $filteredBuilder->countAllResults(false);
+
+            if (!empty($request['order'])) {
+                $orderColumnIndex = $request['order'][0]['column'];
+                $orderDirection   = $request['order'][0]['dir'];
+
+                if (isset($columns[$orderColumnIndex])) {
+                    $builder->orderBy($columns[$orderColumnIndex], $orderDirection);
+                }
+            }
+
+            if ($length != -1) {
+                $builder->limit($length, $start);
+            }
+
+            $details = $builder->get()->getResultArray();
+
+            $finalData = [];
+
+            foreach ($details as $row) {
+                // Hearing date
+                $hearing = $db->table('comment')
+                    ->select('comment_hearing_date')
+                    ->where('refCases_id', $row['cases_id'])
+                    ->orderBy('comment_id', 'DESC')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray();
+
+                $row['hearing_date'] = $hearing['comment_hearing_date'] ?? '0000-00-00';
+                $row['employee_name'] = $row['user_firstname'] . ' ' . $row['user_lastname'];
+                $row['index'] = '';
+
+                $row['action'] = "<a href='" . base_url("front-view-cases/{$row['cases_id']}") . "' 
+                    class='btn btn-xs btn-primary'>
+                    View&nbsp;<em class='icon ni ni-eye-fill'></em>
+                </a>";
+
+                $finalData[] = $row;
+            }
+
+            $recordsTotal = $db->table('cases cs')
+                ->where('cs.refCustomer_id', $customerId)
+                ->countAllResults();
+
+            return $this->response->setJSON([
+                'draw'            => $draw,
+                'recordsTotal'    => $recordsTotal,
+                'recordsFiltered' => $recordsFiltered,
+                'data'            => $finalData
+            ]);
+        }
+
         $data['title'] = FRONT_LIST_CASES_TITLE;
         return view('pages/case_list', $data);
     }

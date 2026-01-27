@@ -107,7 +107,7 @@ $routes->get('symlink', 'Common_c::createSymlink', ['as' => 'symlink']);
 $routes->get('front-view-cases/(:segment)', 'Cases_f::view_cases/$1', ['filter' => 'customerCombo']);
 $routes->group('case', static function ($routes) {
 	$routes->match(['get', 'post'], 'request', 'Common_c::add_cases', ['as' => 'case.request', 'filter' => 'customerCombo']);
-	$routes->get('list', 'Cases_f::cases_list', ['as' => 'case.list', 'filter' => 'customerCombo']);
+	$routes->match(['get', 'post'], 'list', 'Cases_f::cases_list', ['as' => 'case.list', 'filter' => 'customerCombo']);
 });
 $routes->post('front-add-comment', 'Cases_f::add_comment', ['as' => 'front.add.comment']);
 // $routes->match(['get', 'post'], 'front-update-profile', 'Cases_f::update_profile');
