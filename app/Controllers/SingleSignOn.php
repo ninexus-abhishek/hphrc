@@ -28,7 +28,6 @@ class SingleSignOn extends BaseController
         if ($this->request->getMethod() == 'get') {
             try {
                 $token = $this->request->getGet('token');
-
                 $client = \Config\Services::curlrequest();
 
                 $body = [
@@ -40,6 +39,8 @@ class SingleSignOn extends BaseController
                 $response = $client->request('POST',  env('sso.hp.validate_token_url', ''), [
                     'allow_redirects' => false,
                     'form_params' => $body,
+                    'timeout' => 5,
+					'connect_timeout' => 3,
                 ]);
 
                 $result = json_decode($response->getBody(), true);
