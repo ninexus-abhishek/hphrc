@@ -97,10 +97,10 @@
                                                 <td><?= $fdrow['case_files_name'] ?></td>
                                                 <td><?= $fdrow['case_files_title'] ?></td>
                                                 <td><?= $fdrow['case_files_desc'] ?></td>
-                                                <td><a href="<?= 'UPLOAD_FOLDER' . 'doc/' . $fdrow['refCases_id'] . '/' . $fdrow['case_files_unique_name']; ?>" target="_blank">View</a></td>                                                
-                                                <td><a href="<?= 'UPLOAD_FOLDER' . 'doc/' . $fdrow['refCases_id'] . '/' . $fdrow['case_files_unique_name']; ?>" download>Download</a></td>                                                
+                                                <td><a href="<?=  base_url('uploads/doc/causes/' . $fdrow['case_files_name'] ) ?>" target="_blank">View</a></td>                                                
+                                                <td><a href="<?=  base_url('uploads/doc/causes/' . $fdrow['case_files_name'] ) ?>" download>Download</a></td>                                                
                                             </tr>                                        
-                                            <?php endforeach; ?>
+                                        <?php endforeach; ?>
                                     </tbody>
                                 </table>
                             <?php endif; ?>                            
